@@ -45,7 +45,7 @@ async def test_create_preset_401_without_token(async_client: AsyncClient):
         "/api/v1/filter-presets",
         json={"scope": "wagon_list", "name": "test", "filters": {"s": [1]}},
     )
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

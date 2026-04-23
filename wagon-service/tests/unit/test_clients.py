@@ -32,7 +32,7 @@ def _make_client_row(name: str = "ООО Ромашка"):
 @pytest.mark.asyncio
 async def test_get_clients_unauthorized(client: AsyncClient):
     resp = await client.get("/api/v1/clients")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
