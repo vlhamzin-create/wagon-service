@@ -33,7 +33,7 @@ def _make_station_row(code: str = "060005", name: str = "Москва-Товар
 @pytest.mark.asyncio
 async def test_get_stations_unauthorized(client: AsyncClient):
     resp = await client.get("/api/v1/stations")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

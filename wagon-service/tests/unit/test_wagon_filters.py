@@ -57,7 +57,7 @@ async def test_get_filters_returns_client_names(
 @pytest.mark.asyncio
 async def test_get_filters_401_without_token(async_client: AsyncClient):
     resp = await async_client.get("/api/v1/wagons/filters")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

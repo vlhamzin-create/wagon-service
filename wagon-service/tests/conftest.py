@@ -20,11 +20,12 @@ from app.main import app
 # JWT helpers
 # ---------------------------------------------------------------------------
 
-def make_token(role: str = "Логист", sub: str = "test-user") -> str:
+def make_token(role: str = "Логист", sub: str = "00000000-0000-0000-0000-000000000001") -> str:
     payload = {
         "sub": sub,
         "role": role,
         "aud": settings.jwt_audience,
+        "exp": int(datetime.now(timezone.utc).timestamp()) + 3600,
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
