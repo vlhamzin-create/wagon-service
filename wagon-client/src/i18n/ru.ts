@@ -1,0 +1,43 @@
+export default {
+  table: {
+    number: 'Номер вагона',
+    owner_type: 'Тип владения',
+    wagon_type: 'Тип вагона',
+    current_city: 'Город',
+    current_station_name: 'Станция',
+    current_country: 'Страна',
+    status: 'Статус',
+    requires_assignment: 'Назначение',
+    source: 'Источник',
+    updated_at: 'Обновлено',
+    noData: 'Нет данных',
+    loading: 'Загрузка…',
+    loadMore: 'Загрузить ещё',
+    yes: 'Да',
+    no: 'Нет',
+  },
+  mode: {
+    label: 'Режим',
+    all: 'Все вагоны',
+    requires_assignment: 'Требуют назначения',
+  },
+  sync: {
+    refresh: 'Обновить',
+    refreshing: 'Синхронизация…',
+    lastSync: 'Последняя синхронизация',
+    never: 'никогда',
+    error: 'Ошибка синхронизации',
+  },
+  search: {
+    placeholder: 'Поиск по номеру, станции, городу, статусу…',
+  },
+  modal: {
+    close: 'Закрыть',
+    wagonDetails: 'Карточка вагона',
+    externalId: 'ID в RWL',
+    model: 'Модель',
+    capacity: 'Грузоподъёмность, т',
+    volume: 'Объём, м³',
+    createdAt: 'Создан',
+  },
+}
