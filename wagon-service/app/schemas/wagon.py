@@ -66,3 +66,17 @@ class PaginatedWagons(BaseModel):
     limit: int
     offset: int
     has_more: bool
+
+
+class FilterOption(BaseModel):
+    value: str
+    label: str
+
+
+class FilterOptionsResponse(BaseModel):
+    destination_railway: list[FilterOption]
+    supplier_name: list[FilterOption]
+    current_city: list[FilterOption]
+    owner_type: list[FilterOption]
+    wagon_type: list[FilterOption]
+    status: list[FilterOption]

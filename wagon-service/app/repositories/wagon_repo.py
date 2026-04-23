@@ -6,7 +6,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.wagon import Wagon
-from app.schemas.wagon import WagonFilters
+from app.schemas.wagon import FilterOption, FilterOptionsResponse, WagonFilters
 
 # Разрешённые поля сортировки — защита от SQL-инъекций через whitelist
 SORTABLE_FIELDS: dict[str, object] = {
@@ -20,6 +20,27 @@ SORTABLE_FIELDS: dict[str, object] = {
     "owner_type": Wagon.owner_type,
     "supplier_name": Wagon.supplier_name,
     "updated_at": Wagon.updated_at,
+}
+
+# Поля, по которым работает глобальный поиск (все отображаемые строковые)
+GLOBAL_SEARCH_FIELDS = [
+    Wagon.number,
+    Wagon.destination_railway,
+    Wagon.destination_station_name,
+    Wagon.next_destination_station_name,
+    Wagon.current_station_name,
+    Wagon.current_city,
+    Wagon.supplier_name,
+]
+
+# Поля для дропдаунов filter-options: имя поля -> (атрибут ORM, label для UI)
+_FILTER_OPTION_FIELDS: dict[str, object] = {
+    "destination_railway": Wagon.destination_railway,
+    "supplier_name": Wagon.supplier_name,
+    "current_city": Wagon.current_city,
+    "owner_type": Wagon.owner_type,
+    "wagon_type": Wagon.wagon_type,
+    "status": Wagon.status,
 }
 
 
@@ -48,15 +69,10 @@ class WagonRepository:
         if filters.current_station_name:
             stmt = stmt.where(Wagon.current_station_name.in_(filters.current_station_name))
 
-        if filters.search:
-            pattern = f"%{filters.search}%"
+        if filters.search and filters.search.strip():
+            pattern = f"%{filters.search.strip()}%"
             stmt = stmt.where(
-                or_(
-                    Wagon.number.ilike(pattern),
-                    Wagon.destination_station_name.ilike(pattern),
-                    Wagon.next_destination_station_name.ilike(pattern),
-                    Wagon.current_station_name.ilike(pattern),
-                )
+                or_(*(col.ilike(pattern) for col in GLOBAL_SEARCH_FIELDS))
             )
 
         sort_col = SORTABLE_FIELDS.get(filters.sort_by, Wagon.destination_railway)
@@ -82,3 +98,17 @@ class WagonRepository:
         stmt = select(Wagon).where(Wagon.id == wagon_id, Wagon.deleted_at.is_(None))
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_filter_options(self) -> FilterOptionsResponse:
+        """Возвращает уникальные значения для дропдаунов фильтров."""
+        result: dict[str, list[FilterOption]] = {}
+        for field_name, column in _FILTER_OPTION_FIELDS.items():
+            q = (
+                select(column)
+                .where(Wagon.deleted_at.is_(None), column.isnot(None))
+                .distinct()
+                .order_by(column)
+            )
+            values = (await self._session.execute(q)).scalars().all()
+            result[field_name] = [FilterOption(value=v, label=v) for v in values]
+        return FilterOptionsResponse(**result)
