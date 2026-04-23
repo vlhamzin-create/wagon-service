@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # Синхронизация
     sync_interval_minutes: int = 60
 
+    # Интеграция с 1С: отправка назначений
+    onec_assignment_url: str = ""  # URL эндпоинта 1С для приёма назначений
+    onec_assignment_timeout: float = 10.0
+    onec_assignment_max_retries: int = 5
+    onec_assignment_retry_base_seconds: int = 60  # 1 мин → 2 → 4 → 8 → 16
+
     # Прочее
     log_level: str = "INFO"
     allowed_roles: list[str] = ["Руководитель", "Логист", "Просмотр", "Оператор", "Админ"]

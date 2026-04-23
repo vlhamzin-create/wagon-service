@@ -19,6 +19,14 @@ async def _sync_job() -> None:
     await run_sync_job(AsyncSessionLocal)
 
 
+async def _retry_1c_assignments_job() -> None:
+    """Фоновая задача: повторная отправка неотправленных назначений в 1С."""
+    from app.database import AsyncSessionLocal
+    from app.services.onec_assignment_service import retry_pending_assignments
+
+    await retry_pending_assignments(AsyncSessionLocal)
+
+
 def create_scheduler() -> AsyncIOScheduler:
     global _scheduler
     _scheduler = AsyncIOScheduler()
@@ -26,6 +34,12 @@ def create_scheduler() -> AsyncIOScheduler:
         _sync_job,
         trigger=IntervalTrigger(minutes=settings.sync_interval_minutes),
         id="sync_wagons",
+        replace_existing=True,
+    )
+    _scheduler.add_job(
+        _retry_1c_assignments_job,
+        trigger=IntervalTrigger(minutes=1),
+        id="retry_1c_assignments",
         replace_existing=True,
     )
     return _scheduler
