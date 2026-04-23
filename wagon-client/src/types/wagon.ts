@@ -25,6 +25,10 @@ export interface WagonDetail extends WagonListItem {
   volume_m3: number | null
   last_movement_at: string | null
   created_at: string
+  bill_status: import('@/types/etran').EtranDocStatus | null
+  bill_comment: string | null
+  bill_doc_number: string | null
+  bill_updated_at: string | null
 }
 
 export type WagonMode = 'all' | 'requires_assignment'
