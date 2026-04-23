@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wagon
+      POSTGRES_PASSWORD: wagon
+      POSTGRES_DB: wagon_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wagon -d wagon_service"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    build:
+      context: ./wagon-service
+    working_dir: /app
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://wagon:wagon@db:5432/wagon_service"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./wagon-service
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://wagon:wagon@db:5432/wagon_service"
+      JWT_SECRET: "change-me-in-production"
+      JWT_ALGORITHM: "HS256"
+      JWT_AUDIENCE: "wagon-service"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: ./wagon-client
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  pg_data:
