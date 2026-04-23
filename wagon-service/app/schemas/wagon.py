@@ -42,6 +42,7 @@ class WagonListItem(BaseModel):
     current_city: str | None
     destination_station_name: str | None
     destination_railway: str | None
+    next_destination_station_code: str | None
     next_destination_station_name: str | None
     days_without_movement: int | None
     supplier_name: str | None
