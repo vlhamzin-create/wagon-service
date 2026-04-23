@@ -1,45 +1,53 @@
 from __future__ import annotations
 
 import structlog
-import zeep
 
 from etran_adapter.config import Settings
-from etran_adapter.soap.transport import LoggingTransport
+from etran_adapter.soap.base64_helper import decode_text, is_base64
+from etran_adapter.soap.envelope import (
+    SOAP_ACTION_GET_BLOCK,
+    SOAP_ACTION_SEND_BLOCK,
+    build_envelope,
+    parse_envelope_response,
+)
+from etran_adapter.soap.transport import HttpTransport
 
 logger = structlog.get_logger(__name__)
 
 
 class EtranSoapClient:
-    """Тонкая обёртка вокруг zeep.Client для вызовов GetBlock/SendBlock.
+    """SOAP 1.1 клиент для вызовов GetBlock/SendBlock АС ЭТРАН.
 
-    ЭТРАН передаёт бизнес-XML как строку в параметре ``Text``.
-    Zeep используется только для формирования SOAP-конверта.
+    Использует ручную сборку SOAP-конвертов (lxml) и httpx-транспорт.
+    Zeep не используется, так как параметр ``Text`` содержит вложенный XML
+    в виде строки, и Zeep экранирует его, ломая структуру.
     """
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
-        transport = LoggingTransport(
-            timeout=settings.etran_timeout_seconds,
-            operation_timeout=settings.etran_timeout_seconds,
-        )
-        self._client = zeep.Client(
-            wsdl=str(settings.etran_wsdl_url),
-            transport=transport,
-        )
-        self._service = self._client.create_service(
-            binding_name="{http://service.etran.rzd/}EtranServiceBinding",
-            address=str(settings.etran_endpoint_url),
-        )
+        self._transport = HttpTransport(settings)
 
     def send_block(self, xml_text: str) -> str:
         """Вызов SendBlock. Возвращает ``Text`` из ответа."""
-        result = self._service.SendBlock(Text=xml_text)
-        return result
+        return self._call("SendBlock", SOAP_ACTION_SEND_BLOCK, xml_text)
 
     def get_block(self, xml_text: str) -> str:
-        """Вызов GetBlock."""
-        result = self._service.GetBlock(Text=xml_text)
-        return result
+        """Вызов GetBlock. Возвращает ``Text`` из ответа."""
+        return self._call("GetBlock", SOAP_ACTION_GET_BLOCK, xml_text)
+
+    def _call(self, method: str, soap_action: str, xml_text: str) -> str:
+        logger.info("etran_soap_call", method=method)
+
+        envelope_bytes = build_envelope(method, xml_text)
+        raw_response = self._transport.post_soap(soap_action, envelope_bytes)
+        text_response = parse_envelope_response(raw_response)
+
+        # Автоматически декодируем base64, если ответ закодирован
+        if is_base64(text_response):
+            logger.debug("etran_soap_response.base64_detected", method=method)
+            text_response = decode_text(text_response)
+
+        return text_response
 
     def ping(self) -> bool:
         """Проверка соединения через лёгкий НСИ-запрос (health-check)."""
@@ -52,3 +60,7 @@ class EtranSoapClient:
         except Exception:
             logger.warning("etran_ping.failed", exc_info=True)
             return False
+
+    def close(self) -> None:
+        """Освобождает HTTP-соединения."""
+        self._transport.close()
