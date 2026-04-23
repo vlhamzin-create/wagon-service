@@ -53,6 +53,10 @@ async def list_wagons(
     status_filter: Annotated[list[str] | None, Query(alias="status")] = None,
     destination_railway: Annotated[list[str] | None, Query(description="Фильтр по дороге назначения")] = None,
     supplier_name: Annotated[list[str] | None, Query(description="Фильтр по поставщику")] = None,
+    client_name: Annotated[
+        list[str] | None,
+        Query(alias="filter[client_name]", description="Фильтр по клиенту (repeated params)"),
+    ] = None,
     current_city: Annotated[list[str] | None, Query()] = None,
     current_station_name: Annotated[list[str] | None, Query()] = None,
     # Поиск и сортировка
@@ -70,6 +74,7 @@ async def list_wagons(
         status=status_filter,
         destination_railway=destination_railway,
         supplier_name=supplier_name,
+        client_name=client_name,
         current_city=current_city,
         current_station_name=current_station_name,
         search=search,
