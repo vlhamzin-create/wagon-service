@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Index, Integer, Numeric, String, text
+from sqlalchemy import Boolean, Index, Integer, Numeric, String, Text, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -119,19 +119,30 @@ class Wagon(Base):
     current_station_name: Mapped[str | None] = mapped_column(String(255))
     current_city: Mapped[str | None] = mapped_column(String(255))
 
+    # Поля, назначаемые логистом (UC-1.3)
+    route_station_code: Mapped[str | None] = mapped_column(String(16), index=True)
+    route_station_name: Mapped[str | None] = mapped_column(String(255))
+    route_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), index=True)
+    route_client_name: Mapped[str | None] = mapped_column(String(255))
+
     # Станция и дорога назначения
+    destination_station_code: Mapped[str | None] = mapped_column(String(16))
     destination_station_name: Mapped[str | None] = mapped_column(String(255))
     destination_railway: Mapped[str | None] = mapped_column(String(255))
 
-    # TODO-COL-3: следующая станция назначения (источник — RWL, финализированная спецификация)
     next_destination_station_name: Mapped[str | None] = mapped_column(String(255))
-
-    # TODO-COL-1: дни без движения — уточнить: хранимое из RWL или расчётное на BE
     days_without_movement: Mapped[int | None] = mapped_column(Integer)
     last_movement_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True))
 
-    # TODO-COL-2: поставщик — уточнить маппинг источника (RWL / 1С / owner_type)
+    # Расчётные и интеграционные поля
+    assigned_destination_delta_distance: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    assigned_destination_eta: Mapped[str | None] = mapped_column(String(255))
+    distance_to_destination: Mapped[float | None] = mapped_column(Numeric(12, 2))
+
     supplier_name: Mapped[str | None] = mapped_column(String(255))
+    waybill_status: Mapped[str | None] = mapped_column(String(255))
+    sigis_marker: Mapped[str | None] = mapped_column(String(32))
+    comment: Mapped[str | None] = mapped_column(Text())
 
     # Статус и логика распределения
     status: Mapped[str] = mapped_column(String(32), nullable=False)
