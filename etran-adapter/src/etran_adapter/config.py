@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     # ЭТРАН
-    etran_wsdl_url: AnyHttpUrl
+    etran_wsdl_url: AnyHttpUrl | None = None
     etran_endpoint_url: AnyHttpUrl
     etran_login: str
     etran_password: SecretStr

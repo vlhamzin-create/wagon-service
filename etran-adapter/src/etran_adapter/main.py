@@ -26,6 +26,8 @@ async def lifespan(app: FastAPI):
     _soap_client = EtranSoapClient(settings)
     logger.info("etran_adapter.started")
     yield
+    if _soap_client is not None:
+        _soap_client.close()
     _soap_client = None
     logger.info("etran_adapter.stopped")
 

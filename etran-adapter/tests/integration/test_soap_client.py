@@ -3,7 +3,7 @@ from __future__ import annotations
 """Интеграционные тесты SOAP-клиента.
 
 Предполагают наличие ЭТРАН sandbox или WireMock.
-Пропускаются при отсутствии переменной ETRAN_TEST_WSDL.
+Пропускаются при отсутствии переменной ETRAN_TEST_ENDPOINT.
 """
 
 import os
@@ -11,8 +11,8 @@ import os
 import pytest
 
 pytestmark = pytest.mark.skipif(
-    not os.getenv("ETRAN_TEST_WSDL"),
-    reason="ETRAN_TEST_WSDL not set — skipping integration tests",
+    not os.getenv("ETRAN_TEST_ENDPOINT"),
+    reason="ETRAN_TEST_ENDPOINT not set — skipping integration tests",
 )
 
 
