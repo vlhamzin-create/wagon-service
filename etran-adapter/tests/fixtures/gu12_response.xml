@@ -1,0 +1,8 @@
+<Response>
+  <Application>
+    <RequestID>APP-2026-00123</RequestID>
+    <DocNumber>ГУ12-0001234</DocNumber>
+    <StatusCode>3</StatusCode>
+    <StatusDescription>На согласовании</StatusDescription>
+  </Application>
+</Response>

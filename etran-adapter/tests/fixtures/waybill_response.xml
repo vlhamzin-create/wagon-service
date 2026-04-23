@@ -1,0 +1,9 @@
+<Response>
+  <Waybill>
+    <WaybillID>WB-2026-00567</WaybillID>
+    <Number>ЭК-0001234</Number>
+    <VisaStatus>Pending</VisaStatus>
+    <StatusCode>10</StatusCode>
+    <StatusDescription>Ожидает визы</StatusDescription>
+  </Waybill>
+</Response>

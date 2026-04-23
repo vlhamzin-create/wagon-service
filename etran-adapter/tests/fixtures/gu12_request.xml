@@ -1,0 +1,32 @@
+<SendApplication>
+  <AccessParams>
+    <Login>test_login</Login>
+    <Password>secret</Password>
+    <AsuGoId>ASU001</AsuGoId>
+  </AccessParams>
+  <Application>
+    <ShipperOKPO>12345678</ShipperOKPO>
+    <ShipperName>ООО Грузоотправитель</ShipperName>
+    <DepartureStationCode>20000</DepartureStationCode>
+    <DestinationStationCode>30000</DestinationStationCode>
+    <PeriodFrom>2026-05-01</PeriodFrom>
+    <PeriodTo>2026-05-31</PeriodTo>
+    <CargoList>
+      <Cargo>
+        <EtsngCode>011001</EtsngCode>
+        <CargoName>Уголь каменный</CargoName>
+        <WeightKg>60000</WeightKg>
+      </Cargo>
+    </CargoList>
+    <WagonList>
+      <Wagon>
+        <WagonTypeCode>90</WagonTypeCode>
+        <WagonCount>2</WagonCount>
+        <WagonNumbers>
+          <Number>12345678</Number>
+          <Number>87654321</Number>
+        </WagonNumbers>
+      </Wagon>
+    </WagonList>
+  </Application>
+</SendApplication>

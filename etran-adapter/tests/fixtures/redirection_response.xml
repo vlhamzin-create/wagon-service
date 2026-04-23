@@ -1,0 +1,8 @@
+<Response>
+  <Redirection>
+    <RedirectionID>RD-2026-00089</RedirectionID>
+    <StatusCode>20</StatusCode>
+    <StatusDescription>Ожидает одобрения</StatusDescription>
+    <Approved>false</Approved>
+  </Redirection>
+</Response>
