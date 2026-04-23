@@ -5,7 +5,13 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.wagon_repo import WagonRepository
-from app.schemas.wagon import PaginatedWagons, WagonDetail, WagonFilters, WagonListItem
+from app.schemas.wagon import (
+    FilterOptionsResponse,
+    PaginatedWagons,
+    WagonDetail,
+    WagonFilters,
+    WagonListItem,
+)
 
 
 class WagonService:
@@ -27,3 +33,6 @@ class WagonService:
         if wagon is None:
             return None
         return WagonDetail.model_validate(wagon)
+
+    async def get_filter_options(self) -> FilterOptionsResponse:
+        return await self._repo.get_filter_options()

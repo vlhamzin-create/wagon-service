@@ -8,10 +8,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.jwt_handler import CurrentUser
 from app.dependencies import get_db, require_any_role
-from app.schemas.wagon import PaginatedWagons, WagonDetail, WagonFilters
+from app.schemas.wagon import FilterOptionsResponse, PaginatedWagons, WagonDetail, WagonFilters
 from app.services.wagon_service import WagonService
 
 router = APIRouter(prefix="/wagons", tags=["wagons"])
+
+
+# ВАЖНО: /filter-options должен быть зарегистрирован ДО /{wagon_id},
+# иначе FastAPI матчит строку "filter-options" как wagon_id (UUID) и падает с 422.
+@router.get(
+    "/filter-options",
+    response_model=FilterOptionsResponse,
+    summary="Уникальные значения для дропдаунов фильтров",
+)
+async def get_filter_options(
+    db: AsyncSession = Depends(get_db),
+    _user: CurrentUser = Depends(require_any_role),
+) -> FilterOptionsResponse:
+    return await WagonService(db).get_filter_options()
 
 
 @router.get("", response_model=PaginatedWagons, summary="Список вагонов с фильтрацией и пагинацией")

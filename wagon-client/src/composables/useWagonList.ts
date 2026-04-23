@@ -1,15 +1,24 @@
 import { computed } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 import { fetchWagons, PAGE_SIZE } from '@/api/wagons'
+import { useWagonsStore } from '@/stores/wagons'
 import type { WagonFilters } from '@/types/wagon'
 import type { PaginatedWagons } from '@/types/api'
 
 /**
  * Бесконечный скролл поверх GET /wagons.
  * Каждая «страница» = 100 записей (PAGE_SIZE).
+ *
+ * resetCounter из стора включён в queryKey: при изменении фильтров/поиска
+ * счётчик инкрементируется, TanStack Query создаёт новый ключ и автоматически
+ * сбрасывает накопленные страницы, запрашивая заново с offset=0.
  */
 export function useWagonList(filters: () => WagonFilters) {
-  const queryKey = computed(() => ['wagons', filters()] as const)
+  const store = useWagonsStore()
+
+  const queryKey = computed(
+    () => ['wagons', 'list', store.resetCounter, filters()] as const,
+  )
 
   const query = useInfiniteQuery({
     queryKey,
