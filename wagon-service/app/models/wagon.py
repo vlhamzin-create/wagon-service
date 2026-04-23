@@ -82,6 +82,12 @@ class Wagon(Base):
             "current_city",
             postgresql_where=text("deleted_at IS NULL"),
         ),
+        # Фильтр «Станция назначения» — DISTINCT в /filters
+        Index(
+            "idx_wagon_destination_station_name",
+            "destination_station_name",
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
         # updated_at — для инкрементальной синхронизации
         Index(
             "idx_wagon_updated_at",

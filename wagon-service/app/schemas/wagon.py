@@ -80,3 +80,14 @@ class FilterOptionsResponse(BaseModel):
     owner_type: list[FilterOption]
     wagon_type: list[FilterOption]
     status: list[FilterOption]
+
+
+class ClientOption(BaseModel):
+    name: str
+
+
+class WagonFiltersResponse(BaseModel):
+    destination_railways: list[str]
+    clients: list[ClientOption]
+    suppliers: list[str]
+    destination_stations: list[str]
