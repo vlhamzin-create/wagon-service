@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 # Импортируем все модели, чтобы MetaData их увидела
 from app.models.base import Base
-from app.models import wagon, sync_log, request  # noqa: F401
+from app.models import wagon, sync_log, request, audit_log, dicts  # noqa: F401
 
 config = context.config
 
