@@ -12,75 +12,67 @@
       </button>
     </div>
 
+    <SyncWarning :sources="sources" />
+
+    <FilterCounter :total="total" />
+
     <div v-if="filterOptionsLoading" class="filter-panel__loading">Загрузка…</div>
     <div v-else-if="filterOptionsError" class="filter-panel__error">Не удалось загрузить фильтры</div>
     <template v-else-if="filterOptions">
-      <!-- Дорога назначения — список (in) -->
-      <FilterSelect
-        field-name="destination_railway"
+      <!-- Дорога назначения — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Дорога назначения"
         :options="filterOptions.destination_railway"
-        :multiple="true"
         :model-value="pendingFilters.destination_railway"
-        @update:model-value="(v) => setListFilter('destination_railway', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('destination_railway', v)"
       />
 
-      <!-- Поставщик — список (in) -->
-      <FilterSelect
-        field-name="supplier_name"
+      <!-- Поставщик — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Поставщик"
         :options="filterOptions.supplier_name"
-        :multiple="true"
         :model-value="pendingFilters.supplier_name"
-        @update:model-value="(v) => setListFilter('supplier_name', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('supplier_name', v)"
       />
 
-      <!-- Город — список (in) -->
-      <FilterSelect
-        field-name="current_city"
+      <!-- Город — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Текущий город"
         :options="filterOptions.current_city"
-        :multiple="true"
         :model-value="pendingFilters.current_city"
-        @update:model-value="(v) => setListFilter('current_city', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('current_city', v)"
       />
 
-      <!-- Тип собственности — список (in) -->
-      <FilterSelect
-        field-name="owner_type"
+      <!-- Тип собственности — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Тип собственности"
         :options="filterOptions.owner_type"
-        :multiple="true"
         :model-value="pendingFilters.owner_type"
-        @update:model-value="(v) => setListFilter('owner_type', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('owner_type', v)"
       />
 
-      <!-- Тип вагона — список (in) -->
-      <FilterSelect
-        field-name="wagon_type"
+      <!-- Тип вагона — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Тип вагона"
         :options="filterOptions.wagon_type"
-        :multiple="true"
         :model-value="pendingFilters.wagon_type"
-        @update:model-value="(v) => setListFilter('wagon_type', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('wagon_type', v)"
       />
 
-      <!-- Статус — список (in) -->
-      <FilterSelect
-        field-name="status"
+      <!-- Статус — мультивыбор с поиском -->
+      <MultiSelectFilter
         label="Статус"
         :options="filterOptions.status"
-        :multiple="true"
         :model-value="pendingFilters.status"
-        @update:model-value="(v) => setListFilter('status', v as string[] | undefined)"
+        @update:model-value="(v) => setListFilter('status', v)"
       />
 
-      <!-- Станция назначения — подстрока (substring) -->
-      <FilterSearch
-        field-name="destination_station_name"
+      <!-- Станция назначения — автодополнение -->
+      <StationAutocomplete
+        field-name="current_station_name"
         label="Станция назначения"
-        placeholder="Подстрока..."
-        :model-value="pendingFilters.current_station_name"
+        :stations="stationNames"
+        :model-value="currentStationSearch"
         @update:model-value="(v) => setSubstringFilter('current_station_name', v)"
       />
     </template>
@@ -90,12 +82,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useWagonFilters } from '@/composables/useWagonFilters'
+import { useSyncStatus } from '@/composables/useSyncStatus'
 import type { WagonFilters } from '@/types/wagon'
-import FilterSelect from './FilterSelect.vue'
-import FilterSearch from './FilterSearch.vue'
+import MultiSelectFilter from './MultiSelectFilter.vue'
+import StationAutocomplete from './StationAutocomplete.vue'
+import FilterCounter from './FilterCounter.vue'
+import SyncWarning from './SyncWarning.vue'
+
+interface Props {
+  total: number
+}
+
+defineProps<Props>()
 
 const { pendingFilters, resetFilters, filterOptions, filterOptionsLoading, filterOptionsError } =
   useWagonFilters()
+
+const { sources } = useSyncStatus()
 
 type ActiveFilters = Omit<WagonFilters, 'mode' | 'search' | 'sort_by' | 'sort_dir'>
 
@@ -104,6 +107,17 @@ const hasActiveFilters = computed(() => {
   return Object.values(f).some((v) =>
     Array.isArray(v) ? v.length > 0 : v !== undefined && v !== '',
   )
+})
+
+const stationNames = computed(() => {
+  if (!filterOptions.value) return []
+  const cityOptions = filterOptions.value.current_city
+  return cityOptions ? cityOptions.map((o) => o.label) : []
+})
+
+const currentStationSearch = computed(() => {
+  const val = pendingFilters.value.current_station_name
+  return Array.isArray(val) && val.length > 0 ? val[0] : undefined
 })
 
 function setListFilter(field: keyof ActiveFilters, value: string[] | undefined): void {

@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { fetchSyncStatus, triggerSync } from '@/api/sync'
 import type { SourceStatus } from '@/types/api'
 
@@ -49,5 +49,7 @@ export function useSyncStatus() {
     }
   }
 
-  return { sources, isRefreshing, error, startPolling, stopPolling, triggerRefresh }
+  const showWarning = computed(() => sources.value.some((s) => s.last_status === 'error'))
+
+  return { sources, isRefreshing, error, showWarning, startPolling, stopPolling, triggerRefresh }
 }

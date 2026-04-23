@@ -31,6 +31,19 @@ export default {
   search: {
     placeholder: 'Поиск по номеру, станции, городу, статусу…',
   },
+  filters: {
+    title: 'Фильтры',
+    resetAll: 'Сбросить всё',
+    found: 'Найдено',
+    noResults: 'По выбранным фильтрам ничего не найдено',
+    resetFilters: 'Сбросить фильтры',
+    searchPlaceholder: 'Поиск…',
+    allOption: '— Все —',
+    selected: 'выбрано',
+    nothingFound: 'Ничего не найдено',
+    stationPlaceholder: 'Начните вводить…',
+    syncWarning: 'Ошибка синхронизации RWL. Данные могут быть неактуальны.',
+  },
   modal: {
     close: 'Закрыть',
     wagonDetails: 'Карточка вагона',
