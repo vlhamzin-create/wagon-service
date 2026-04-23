@@ -10,6 +10,7 @@ from app.schemas.wagon import (
     PaginatedWagons,
     WagonDetail,
     WagonFilters,
+    WagonFiltersResponse,
     WagonListItem,
 )
 
@@ -33,6 +34,9 @@ class WagonService:
         if wagon is None:
             return None
         return WagonDetail.model_validate(wagon)
+
+    async def get_filters(self) -> WagonFiltersResponse:
+        return await self._repo.get_filters()
 
     async def get_filter_options(self) -> FilterOptionsResponse:
         return await self._repo.get_filter_options()

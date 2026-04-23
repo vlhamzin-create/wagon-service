@@ -5,8 +5,9 @@ import uuid
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.request import Request
 from app.models.wagon import Wagon
-from app.schemas.wagon import FilterOption, FilterOptionsResponse, WagonFilters
+from app.schemas.wagon import ClientOption, FilterOption, FilterOptionsResponse, WagonFilters, WagonFiltersResponse
 
 # Разрешённые поля сортировки — защита от SQL-инъекций через whitelist
 SORTABLE_FIELDS: dict[str, object] = {
@@ -98,6 +99,45 @@ class WagonRepository:
         stmt = select(Wagon).where(Wagon.id == wagon_id, Wagon.deleted_at.is_(None))
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_filters(self) -> WagonFiltersResponse:
+        """Возвращает distinct-значения для панели фильтров: дороги, клиенты, поставщики, станции."""
+        railways_q = (
+            select(Wagon.destination_railway)
+            .where(Wagon.deleted_at.is_(None), Wagon.destination_railway.isnot(None))
+            .distinct()
+            .order_by(Wagon.destination_railway)
+        )
+        clients_q = (
+            select(Request.client_name)
+            .where(Request.client_name.isnot(None))
+            .distinct()
+            .order_by(Request.client_name)
+        )
+        suppliers_q = (
+            select(Wagon.supplier_name)
+            .where(Wagon.deleted_at.is_(None), Wagon.supplier_name.isnot(None))
+            .distinct()
+            .order_by(Wagon.supplier_name)
+        )
+        stations_q = (
+            select(Wagon.destination_station_name)
+            .where(Wagon.deleted_at.is_(None), Wagon.destination_station_name.isnot(None))
+            .distinct()
+            .order_by(Wagon.destination_station_name)
+        )
+
+        railways_res = (await self._session.execute(railways_q)).scalars().all()
+        clients_res = (await self._session.execute(clients_q)).scalars().all()
+        suppliers_res = (await self._session.execute(suppliers_q)).scalars().all()
+        stations_res = (await self._session.execute(stations_q)).scalars().all()
+
+        return WagonFiltersResponse(
+            destination_railways=list(railways_res),
+            clients=[ClientOption(name=v) for v in clients_res],
+            suppliers=list(suppliers_res),
+            destination_stations=list(stations_res),
+        )
 
     async def get_filter_options(self) -> FilterOptionsResponse:
         """Возвращает уникальные значения для дропдаунов фильтров."""
