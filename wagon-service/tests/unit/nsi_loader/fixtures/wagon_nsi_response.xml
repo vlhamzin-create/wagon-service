@@ -1,0 +1,23 @@
+<WagonNSIResponse>
+  <ChgDateTime>2026-04-24T04:00:00</ChgDateTime>
+  <WagonType>
+    <TypeCode>01</TypeCode>
+    <TypeName>Крытый</TypeName>
+    <CargoCapacity>68.0</CargoCapacity>
+    <Volume>120.0</Volume>
+    <TareWeight>22.0</TareWeight>
+    <AxleCount>4</AxleCount>
+    <IsActive>true</IsActive>
+    <Version>200100</Version>
+  </WagonType>
+  <WagonType>
+    <TypeCode>02</TypeCode>
+    <TypeName>Полувагон</TypeName>
+    <CargoCapacity>69.5</CargoCapacity>
+    <Volume>73.0</Volume>
+    <TareWeight>23.5</TareWeight>
+    <AxleCount>4</AxleCount>
+    <IsActive>true</IsActive>
+    <Version>200101</Version>
+  </WagonType>
+</WagonNSIResponse>

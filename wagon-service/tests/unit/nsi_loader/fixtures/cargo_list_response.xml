@@ -1,0 +1,31 @@
+<CargoListResponse>
+  <ChgDateTime>2026-04-24T05:00:00</ChgDateTime>
+  <Cargo>
+    <EtsngCode>011001</EtsngCode>
+    <EtsngName>Пшеница</EtsngName>
+    <GngCode>1001100000</GngCode>
+    <GngName>Wheat</GngName>
+    <CargoGroup>Зерно</CargoGroup>
+    <IsDangerous>false</IsDangerous>
+    <IsActive>true</IsActive>
+    <Version>300100</Version>
+  </Cargo>
+  <Cargo>
+    <EtsngCode>421005</EtsngCode>
+    <EtsngName>Бензин автомобильный</EtsngName>
+    <GngCode>2710121100</GngCode>
+    <GngName>Motor spirit</GngName>
+    <CargoGroup>Нефтепродукты</CargoGroup>
+    <IsDangerous>true</IsDangerous>
+    <IsActive>true</IsActive>
+    <Version>300101</Version>
+  </Cargo>
+  <Cargo>
+    <EtsngCode>241010</EtsngCode>
+    <EtsngName>Уголь каменный</EtsngName>
+    <CargoGroup>Уголь</CargoGroup>
+    <IsDangerous>false</IsDangerous>
+    <IsActive>true</IsActive>
+    <Version>300102</Version>
+  </Cargo>
+</CargoListResponse>

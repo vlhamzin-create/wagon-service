@@ -28,6 +28,15 @@ class Settings(BaseSettings):
     onec_assignment_max_retries: int = 5
     onec_assignment_retry_base_seconds: int = 60  # 1 мин → 2 → 4 → 8 → 16
 
+    # НСИ ЭТРАН
+    etran_adapter_url: str = "http://etran-adapter"
+    etran_adapter_api_key: str = ""
+    etran_adapter_timeout: float = 30.0
+    nsi_stations_cron_hour: int = 3
+    nsi_wagon_types_interval_hours: int = 4
+    nsi_cargos_cron_hour: int = 4
+    nsi_sync_enabled: bool = True
+
     # Прочее
     log_level: str = "INFO"
     allowed_roles: list[str] = ["Руководитель", "Логист", "Просмотр", "Оператор", "Админ"]
