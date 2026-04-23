@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from etran_adapter.models.base import Base
 from etran_adapter.models import request_log  # noqa: F401
+from etran_adapter.models import document_type, message, document, operation  # noqa: F401
 
 config = context.config
 
