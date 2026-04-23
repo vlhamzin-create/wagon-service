@@ -14,6 +14,7 @@ class WagonFilters(BaseModel):
     status: list[str] | None = None
     destination_railway: list[str] | None = None
     supplier_name: list[str] | None = None
+    client_name: list[str] | None = None
     current_city: list[str] | None = None
     current_station_name: list[str] | None = None
     search: str | None = None
@@ -83,12 +84,8 @@ class FilterOptionsResponse(BaseModel):
     status: list[FilterOption]
 
 
-class ClientOption(BaseModel):
-    name: str
-
-
 class WagonFiltersResponse(BaseModel):
     destination_railways: list[str]
-    clients: list[ClientOption]
+    client_names: list[str]
     suppliers: list[str]
     destination_stations: list[str]

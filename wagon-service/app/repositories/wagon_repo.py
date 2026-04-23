@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.request import Request
 from app.models.wagon import Wagon
-from app.schemas.wagon import ClientOption, FilterOption, FilterOptionsResponse, WagonFilters, WagonFiltersResponse
+from app.schemas.wagon import FilterOption, FilterOptionsResponse, WagonFilters, WagonFiltersResponse
 
 # Разрешённые поля сортировки — защита от SQL-инъекций через whitelist
 SORTABLE_FIELDS: dict[str, object] = {
@@ -67,6 +67,10 @@ class WagonRepository:
             stmt = stmt.where(Wagon.supplier_name.in_(filters.supplier_name))
         if filters.current_city:
             stmt = stmt.where(Wagon.current_city.in_(filters.current_city))
+        if filters.client_name:
+            stmt = stmt.join(
+                Request, Request.wagon_assigned_id == Wagon.id,
+            ).where(Request.client_name.in_(filters.client_name))
         if filters.current_station_name:
             stmt = stmt.where(Wagon.current_station_name.in_(filters.current_station_name))
 
@@ -118,7 +122,12 @@ class WagonRepository:
         )
         clients_q = (
             select(Request.client_name)
-            .where(Request.client_name.isnot(None))
+            .join(Wagon, Wagon.id == Request.wagon_assigned_id)
+            .where(
+                Request.wagon_assigned_id.isnot(None),
+                Request.client_name.isnot(None),
+                Wagon.deleted_at.is_(None),
+            )
             .distinct()
             .order_by(Request.client_name)
         )
@@ -142,7 +151,7 @@ class WagonRepository:
 
         return WagonFiltersResponse(
             destination_railways=list(railways_res),
-            clients=[ClientOption(name=v) for v in clients_res],
+            client_names=list(clients_res),
             suppliers=list(suppliers_res),
             destination_stations=list(stations_res),
         )
