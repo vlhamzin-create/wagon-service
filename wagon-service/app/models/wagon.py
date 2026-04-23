@@ -151,6 +151,12 @@ class Wagon(Base):
         Boolean, nullable=False, server_default=text("false")
     )
 
+    # Статус синхронизации с 1С
+    onec_sync_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=text("'NOT_SYNCED'")
+    )
+    onec_synced_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True))
+
     # Мета
     source: Mapped[str] = mapped_column(String(32), nullable=False)
     created_at: Mapped[datetime] = mapped_column(

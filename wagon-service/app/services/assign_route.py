@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import uuid
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,11 +15,15 @@ from app.schemas.assign_route import (
     WagonAssignResult,
 )
 from app.services.audit import write_audit_entries
+from app.services.onec_assignment_service import OneCAssignmentService
+
+log = structlog.get_logger(__name__)
 
 
 class AssignRouteService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+        self._onec_service = OneCAssignmentService(session)
 
     async def assign(
         self,
@@ -134,7 +140,27 @@ class AssignRouteService:
                     "overwrite": req.overwrite,
                 },
             )
+
+            # Создаём запись для синхронизации с 1С (assignment_id = batch UUID)
+            batch_id = uuid.uuid4()
+            sync_entry = await self._onec_service.create_sync_entry(batch_id)
+
             await self._session.commit()
+
+            # Отправку в 1С запускаем в фоне, не блокируя HTTP-ответ
+            client_ext_id: str | None = None
+            if client is not None:
+                client_ext_id = client.external_id_1c
+
+            asyncio.create_task(
+                self._send_to_1c_background(
+                    sync_entry=sync_entry,
+                    wagon_ids=updated_ids,
+                    station_code=req.station_code,
+                    client_external_id=client_ext_id,
+                    user_id=user_id,
+                )
+            )
 
         succeeded = sum(1 for r in results if r.status == "ok")
         skipped = sum(1 for r in results if r.status == "skipped")
@@ -147,6 +173,42 @@ class AssignRouteService:
             failed=failed,
             results=results,
         )
+
+    async def _send_to_1c_background(
+        self,
+        sync_entry,
+        wagon_ids: list[uuid.UUID],
+        station_code: str | None,
+        client_external_id: str | None,
+        user_id: uuid.UUID,
+    ) -> None:
+        """Фоновая отправка назначения в 1С. Ошибки логируются, не пробрасываются."""
+        try:
+            from app.database import AsyncSessionLocal
+
+            async with AsyncSessionLocal() as bg_session:
+                service = OneCAssignmentService(bg_session)
+                # Загружаем sync_entry заново в новой сессии
+                repo = service._repo
+                entry = await repo.get_by_assignment(sync_entry.assignment_id)
+                if entry is None:
+                    log.error(
+                        "onec_bg.entry_not_found",
+                        assignment_id=str(sync_entry.assignment_id),
+                    )
+                    return
+                await service.send_to_1c(
+                    sync_log=entry,
+                    wagon_ids=wagon_ids,
+                    station_code=station_code,
+                    client_external_id=client_external_id,
+                    user_id=user_id,
+                )
+        except Exception:
+            log.exception(
+                "onec_bg.send_failed",
+                assignment_id=str(sync_entry.assignment_id),
+            )
 
     @staticmethod
     def _all_error(wagon_ids: list[uuid.UUID], reason: str) -> AssignRouteResponse:
