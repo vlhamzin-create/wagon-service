@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import asc, desc, func, nulls_last, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.request import Request
@@ -76,8 +76,16 @@ class WagonRepository:
                 or_(*(col.ilike(pattern) for col in GLOBAL_SEARCH_FIELDS))
             )
 
-        sort_col = SORTABLE_FIELDS.get(filters.sort_by, Wagon.destination_railway)
-        sort_expr = sort_col.desc() if filters.sort_dir == "desc" else sort_col.asc()
+        # TODO-COL-1: days_without_movement вычисляется из last_movement_at,
+        # сортировка инвертируется (больше дней = более старый last_movement_at).
+        if filters.sort_by == "days_without_movement":
+            if filters.sort_dir == "desc":
+                sort_expr = nulls_last(asc(Wagon.last_movement_at))
+            else:
+                sort_expr = nulls_last(desc(Wagon.last_movement_at))
+        else:
+            sort_col = SORTABLE_FIELDS.get(filters.sort_by, Wagon.destination_railway)
+            sort_expr = sort_col.desc() if filters.sort_dir == "desc" else sort_col.asc()
         # Вторичная сортировка: destination_station_name, затем id для стабильной пагинации
         stmt = stmt.order_by(sort_expr, Wagon.destination_station_name.asc(), Wagon.id.asc())
 

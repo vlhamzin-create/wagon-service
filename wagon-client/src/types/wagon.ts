@@ -9,6 +9,7 @@ export interface WagonListItem {
   current_city: string | null
   destination_station_name: string | null
   destination_railway: string | null
+  next_destination_station_code: string | null
   next_destination_station_name: string | null
   days_without_movement: number | null
   supplier_name: string | null

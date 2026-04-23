@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, Index, Integer, Numeric, String, Text, text
+from sqlalchemy import Boolean, Index, Numeric, String, Text, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -94,6 +94,18 @@ class Wagon(Base):
             "updated_at",
             postgresql_using="btree",
         ),
+        # TODO-COL-1: сортировка по «Дням без движения»
+        Index(
+            "idx_wagon_last_movement_at",
+            "last_movement_at",
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        # TODO-COL-3: фильтрация по следующей станции назначения
+        Index(
+            "idx_wagon_next_destination",
+            "next_destination_station_name",
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
         {"schema": SCHEMA},
     )
 
@@ -130,9 +142,18 @@ class Wagon(Base):
     destination_station_name: Mapped[str | None] = mapped_column(String(255))
     destination_railway: Mapped[str | None] = mapped_column(String(255))
 
+    next_destination_station_code: Mapped[str | None] = mapped_column(String(16))
     next_destination_station_name: Mapped[str | None] = mapped_column(String(255))
-    days_without_movement: Mapped[int | None] = mapped_column(Integer)
     last_movement_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True))
+
+    @property
+    def days_without_movement(self) -> int | None:
+        """TODO-COL-1: вычисляется на BE, не хранится в БД."""
+        if self.last_movement_at is None:
+            return None
+        today = date.today()
+        movement_date = self.last_movement_at.astimezone(timezone.utc).date()
+        return (today - movement_date).days
 
     # Расчётные и интеграционные поля
     assigned_destination_delta_distance: Mapped[float | None] = mapped_column(Numeric(12, 2))

@@ -1,7 +1,7 @@
 -- =============================================================
 -- DDL: wagon_service schema
 -- PostgreSQL 15+
--- Соответствует миграции 0003_align_schema_to_architecture
+-- Соответствует миграции 0013_wagon_todo_col_123
 -- =============================================================
 
 CREATE SCHEMA IF NOT EXISTS wagon_service;
@@ -37,14 +37,14 @@ CREATE TABLE wagon_service.wagon (
     destination_station_name      VARCHAR(255),
     destination_railway           VARCHAR(255),
 
-    -- TODO-COL-3: следующая станция назначения (источник — RWL, финализированная спецификация)
+    -- Следующая станция назначения (источник — RWL)
+    next_destination_station_code VARCHAR(16),
     next_destination_station_name VARCHAR(255),
 
-    -- TODO-COL-1: дни без движения; уточнить: хранимое из RWL или расчётное на BE
-    days_without_movement         INTEGER,
+    -- Дата последнего движения из RWL; days_without_movement вычисляется на BE
     last_movement_at              TIMESTAMPTZ,
 
-    -- TODO-COL-2: поставщик; уточнить маппинг источника (RWL / 1С / owner_type)
+    -- Наименование поставщика из RWL
     supplier_name                 VARCHAR(255),
 
     -- Статус и логика распределения
@@ -67,12 +67,14 @@ CREATE TABLE wagon_service.wagon (
 COMMENT ON TABLE  wagon_service.wagon IS 'Актуальные данные о вагонах из RWL и 1С';
 COMMENT ON COLUMN wagon_service.wagon.requires_assignment IS
     'Вычисляется синхронизатором: true если существует незакрытая заявка без назначенного вагона и вагон подходит по критериям';
-COMMENT ON COLUMN wagon_service.wagon.days_without_movement IS
-    'TODO-COL-1: расчётное или хранимое из RWL — требует уточнения';
+COMMENT ON COLUMN wagon_service.wagon.last_movement_at IS
+    'Дата и время последнего движения из RWL. days_without_movement вычисляется на BE: CURRENT_DATE - last_movement_at::date. Закрыто: TODO-COL-1';
 COMMENT ON COLUMN wagon_service.wagon.supplier_name IS
-    'TODO-COL-2: маппинг поля «Поставщик» — уточнить источник';
+    'Наименование поставщика из RWL. NULL если RWL не передаёт значение. Закрыто: TODO-COL-2';
+COMMENT ON COLUMN wagon_service.wagon.next_destination_station_code IS
+    'Код следующей станции назначения из RWL. Закрыто: TODO-COL-3';
 COMMENT ON COLUMN wagon_service.wagon.next_destination_station_name IS
-    'TODO-COL-3: источник поля — RWL, добавлено по финализированной спецификации';
+    'Наименование следующей станции назначения из RWL. Закрыто: TODO-COL-3';
 
 -- =============================================================
 -- TABLE: request
@@ -219,6 +221,16 @@ CREATE INDEX idx_wagon_current_city
 -- 11. updated_at — инкрементальная синхронизация
 CREATE INDEX idx_wagon_updated_at
     ON wagon_service.wagon (updated_at DESC);
+
+-- 12a. last_movement_at — сортировка по «Дням без движения» (TODO-COL-1)
+CREATE INDEX idx_wagon_last_movement_at
+    ON wagon_service.wagon (last_movement_at)
+    WHERE deleted_at IS NULL;
+
+-- 12b. next_destination_station_name — фильтрация по следующей станции (TODO-COL-3)
+CREATE INDEX idx_wagon_next_destination
+    ON wagon_service.wagon (next_destination_station_name)
+    WHERE deleted_at IS NULL;
 
 -- =============================================================
 -- ИНДЕКСЫ: request
