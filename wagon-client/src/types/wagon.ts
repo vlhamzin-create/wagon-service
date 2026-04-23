@@ -43,6 +43,7 @@ export interface WagonFilters {
   status?: string[]
   destination_railway?: string[]
   supplier_name?: string[]
+  client_name?: string[]
   current_city?: string[]
   current_station_name?: string[]
   search?: string
