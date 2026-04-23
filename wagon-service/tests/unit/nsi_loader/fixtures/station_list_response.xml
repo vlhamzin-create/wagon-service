@@ -1,0 +1,35 @@
+<StationListResponse>
+  <ChgDateTime>2026-04-24T03:00:00</ChgDateTime>
+  <Station>
+    <Code>060005</Code>
+    <Name>Москва-Товарная</Name>
+    <ShortName>Мск-Тов</ShortName>
+    <CountryCode>RU</CountryCode>
+    <CountryName>Россия</CountryName>
+    <RailwayCode>16</RailwayCode>
+    <RailwayName>Московская</RailwayName>
+    <IsActive>true</IsActive>
+    <Version>100500</Version>
+  </Station>
+  <Station>
+    <Code>030201</Code>
+    <Name>Санкт-Петербург-Товарный</Name>
+    <ShortName>СПб-Тов</ShortName>
+    <CountryCode>RU</CountryCode>
+    <CountryName>Россия</CountryName>
+    <RailwayCode>01</RailwayCode>
+    <RailwayName>Октябрьская</RailwayName>
+    <IsActive>true</IsActive>
+    <Version>100501</Version>
+  </Station>
+  <Station>
+    <Code>200105</Code>
+    <Name>Минск-Товарный</Name>
+    <CountryCode>BY</CountryCode>
+    <CountryName>Беларусь</CountryName>
+    <RailwayCode>21</RailwayCode>
+    <RailwayName>Белорусская</RailwayName>
+    <IsActive>false</IsActive>
+    <Version>100502</Version>
+  </Station>
+</StationListResponse>

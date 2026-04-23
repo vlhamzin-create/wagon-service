@@ -42,6 +42,10 @@ def create_scheduler() -> AsyncIOScheduler:
         id="retry_1c_assignments",
         replace_existing=True,
     )
+
+    from app.nsi_loader.scheduler import register_nsi_jobs
+    register_nsi_jobs(_scheduler)
+
     return _scheduler
 
 
