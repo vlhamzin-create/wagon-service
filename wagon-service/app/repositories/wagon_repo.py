@@ -8,14 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.wagon import Wagon
 from app.schemas.wagon import WagonFilters
 
-# Разрешённые поля сортировки — защита от SQL-инъекций
+# Разрешённые поля сортировки — защита от SQL-инъекций через whitelist
 SORTABLE_FIELDS: dict[str, object] = {
+    "destination_railway": Wagon.destination_railway,
+    "destination_station_name": Wagon.destination_station_name,
     "current_city": Wagon.current_city,
     "current_station_name": Wagon.current_station_name,
     "number": Wagon.number,
     "status": Wagon.status,
     "wagon_type": Wagon.wagon_type,
     "owner_type": Wagon.owner_type,
+    "supplier_name": Wagon.supplier_name,
     "updated_at": Wagon.updated_at,
 }
 
@@ -36,6 +39,10 @@ class WagonRepository:
             stmt = stmt.where(Wagon.wagon_type.in_(filters.wagon_type))
         if filters.status:
             stmt = stmt.where(Wagon.status.in_(filters.status))
+        if filters.destination_railway:
+            stmt = stmt.where(Wagon.destination_railway.in_(filters.destination_railway))
+        if filters.supplier_name:
+            stmt = stmt.where(Wagon.supplier_name.in_(filters.supplier_name))
         if filters.current_city:
             stmt = stmt.where(Wagon.current_city.in_(filters.current_city))
         if filters.current_station_name:
@@ -46,15 +53,16 @@ class WagonRepository:
             stmt = stmt.where(
                 or_(
                     Wagon.number.ilike(pattern),
+                    Wagon.destination_station_name.ilike(pattern),
+                    Wagon.next_destination_station_name.ilike(pattern),
                     Wagon.current_station_name.ilike(pattern),
-                    Wagon.current_city.ilike(pattern),
-                    Wagon.status.ilike(pattern),
                 )
             )
 
-        sort_col = SORTABLE_FIELDS.get(filters.sort_by, Wagon.current_city)
+        sort_col = SORTABLE_FIELDS.get(filters.sort_by, Wagon.destination_railway)
         sort_expr = sort_col.desc() if filters.sort_dir == "desc" else sort_col.asc()
-        stmt = stmt.order_by(sort_expr, Wagon.current_station_name.asc(), Wagon.id.asc())
+        # Вторичная сортировка: destination_station_name, затем id для стабильной пагинации
+        stmt = stmt.order_by(sort_expr, Wagon.destination_station_name.asc(), Wagon.id.asc())
 
         return stmt
 

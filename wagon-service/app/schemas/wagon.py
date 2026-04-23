@@ -12,11 +12,14 @@ class WagonFilters(BaseModel):
     owner_type: list[str] | None = None
     wagon_type: list[str] | None = None
     status: list[str] | None = None
+    destination_railway: list[str] | None = None
+    supplier_name: list[str] | None = None
     current_city: list[str] | None = None
     current_station_name: list[str] | None = None
     search: str | None = None
-    sort_by: str = "current_city"
-    sort_dir: Literal["asc", "desc"] = "asc"
+    # Сортировка по умолчанию соответствует idx_wagon_sort_default
+    sort_by: str = "destination_railway"
+    sort_dir: Literal["asc", "desc"] = "desc"
     limit: int = 100
     offset: int = 0
 
@@ -37,6 +40,11 @@ class WagonListItem(BaseModel):
     current_station_code: str | None
     current_station_name: str | None
     current_city: str | None
+    destination_station_name: str | None
+    destination_railway: str | None
+    next_destination_station_name: str | None
+    days_without_movement: int | None
+    supplier_name: str | None
     status: str
     requires_assignment: bool
     source: str
@@ -48,6 +56,7 @@ class WagonDetail(WagonListItem):
     model: str | None
     capacity_tons: float | None
     volume_m3: float | None
+    last_movement_at: datetime | None
     created_at: datetime
 
 
