@@ -20,11 +20,10 @@ from app.main import app
 # JWT helpers
 # ---------------------------------------------------------------------------
 
-def make_token(roles: list[str] | None = None, sub: str = "test-user") -> str:
+def make_token(role: str = "Логист", sub: str = "test-user") -> str:
     payload = {
         "sub": sub,
-        "username": sub,
-        "roles": roles or ["Логист"],
+        "role": role,
         "aud": settings.jwt_audience,
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
@@ -83,4 +82,4 @@ def auth_headers() -> dict[str, str]:
 
 @pytest.fixture
 def admin_headers() -> dict[str, str]:
-    return {"Authorization": f"Bearer {make_token(roles=['Админ'])}"}
+    return {"Authorization": f"Bearer {make_token(role='Админ')}"}

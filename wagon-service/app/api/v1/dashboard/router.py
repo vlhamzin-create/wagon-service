@@ -6,7 +6,7 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.jwt_handler import CurrentUser
+from app.auth.models import TokenPayload
 from app.dependencies import get_db, require_roles
 from app.api.v1.dashboard.schemas import DashboardBasicResponse
 from app.api.v1.dashboard.service import DashboardService
@@ -28,7 +28,7 @@ _require_manager = require_roles("Руководитель")
 async def get_basic_dashboard(
     wagon_type: Annotated[Optional[str], Query(max_length=100, description="Фильтр по типу вагона")] = None,
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(_require_manager),
+    _user: TokenPayload = Depends(_require_manager),
 ) -> DashboardBasicResponse:
     service = DashboardService(db)
     data = await service.get_dashboard_data(wagon_type=wagon_type)
