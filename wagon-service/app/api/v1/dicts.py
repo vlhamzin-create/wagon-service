@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.jwt_handler import CurrentUser
+from app.auth.models import TokenPayload
 from app.dependencies import get_db, require_any_role
 from app.models.dicts import ClientDict, StationDict
 from app.schemas.clients import ClientItem, ClientsResponse
@@ -20,7 +20,7 @@ async def get_stations(
     q: Annotated[str | None, Query(max_length=200, description="Поиск по коду или названию")] = None,
     limit: Annotated[int, Query(ge=1, le=50)] = 20,
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> StationsResponse:
     stmt = select(StationDict).where(StationDict.is_active.is_(True))
 
@@ -50,7 +50,7 @@ async def get_clients(
     q: Annotated[str | None, Query(max_length=200, description="Поиск по названию")] = None,
     limit: Annotated[int, Query(ge=1, le=50)] = 20,
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> ClientsResponse:
     stmt = select(ClientDict).where(ClientDict.is_active.is_(True))
 

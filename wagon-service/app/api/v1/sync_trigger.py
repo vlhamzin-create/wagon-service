@@ -8,7 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.jwt_handler import CurrentUser
+from app.auth.models import TokenPayload
 from app.database import AsyncSessionLocal
 from app.dependencies import get_db, require_roles
 from app.services.sync_service import SyncService, run_sync_job
@@ -33,12 +33,12 @@ class TriggerResponse(BaseModel):
 )
 async def trigger_sync(
     background_tasks: BackgroundTasks,
-    _user: Annotated[CurrentUser, Depends(_require_trigger)] = None,
+    _user: Annotated[TokenPayload, Depends(_require_trigger)] = None,
 ) -> TriggerResponse:
     """Ставит задачу синхронизации в фон и немедленно возвращает 202.
 
     Статус выполнения можно отслеживать через ``GET /api/v1/sync-status``.
     """
     background_tasks.add_task(run_sync_job, AsyncSessionLocal)
-    log.info("sync_trigger.accepted", user=_user.username if _user else None)
+    log.info("sync_trigger.accepted", user=_user.sub if _user else None)
     return TriggerResponse(detail="Sync started")

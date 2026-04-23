@@ -6,7 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.jwt_handler import CurrentUser
+from app.auth.models import TokenPayload
 from app.dependencies import get_db, require_any_role
 from app.schemas.wagon import FilterOptionsResponse, PaginatedWagons, WagonDetail, WagonFilters, WagonFiltersResponse
 from app.services.wagon_service import WagonService
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/wagons", tags=["wagons"])
 )
 async def get_filters(
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> WagonFiltersResponse:
     return await WagonService(db).get_filters()
 
@@ -35,7 +35,7 @@ async def get_filters(
 )
 async def get_filter_options(
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> FilterOptionsResponse:
     return await WagonService(db).get_filter_options()
 
@@ -61,7 +61,7 @@ async def list_wagons(
     sort_dir: Annotated[str, Query(description="asc | desc")] = "desc",
     # Зависимости
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> PaginatedWagons:
     filters = WagonFilters(
         mode=mode,  # type: ignore[arg-type]
@@ -85,7 +85,7 @@ async def list_wagons(
 async def get_wagon(
     wagon_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _user: CurrentUser = Depends(require_any_role),
+    _user: TokenPayload = Depends(require_any_role),
 ) -> WagonDetail:
     wagon = await WagonService(db).get_wagon(wagon_id)
     if wagon is None:
