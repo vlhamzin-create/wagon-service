@@ -4,8 +4,7 @@ import { useWagonsStore } from '@/stores/wagons'
 import { fetchFilterOptions } from '@/api/wagons'
 import { debounce } from '@/utils/debounce'
 import type { FilterOptionsResponse, WagonFilters } from '@/types/wagon'
-
-const DEBOUNCE_MS = 300
+import { FILTER_DEBOUNCE_MS } from '@/constants/filters'
 
 /**
  * Связывает поле глобального поиска и панель фильтров с хранилищем через debounce.
@@ -19,7 +18,7 @@ export function useWagonFilters() {
 
   const _applySearch = debounce((value: string) => {
     store.setSearch(value)
-  }, DEBOUNCE_MS)
+  }, FILTER_DEBOUNCE_MS)
 
   watch(searchInput, (v) => _applySearch(v))
 
@@ -38,7 +37,7 @@ export function useWagonFilters() {
     (f: Omit<WagonFilters, 'mode' | 'search' | 'sort_by' | 'sort_dir'>) => {
       store.setFilters(f)
     },
-    DEBOUNCE_MS,
+    FILTER_DEBOUNCE_MS,
   )
 
   watch(pendingFilters, (f) => _applyFilters({ ...f }), { deep: true })
