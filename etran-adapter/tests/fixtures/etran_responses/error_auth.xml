@@ -1,0 +1,6 @@
+<Response>
+  <Error>
+    <Code>AUTH</Code>
+    <Message>Неверные учётные данные</Message>
+  </Error>
+</Response>

@@ -1,0 +1,8 @@
+<Response>
+  <Waybill>
+    <WaybillID>12345</WaybillID>
+    <Status>Accepted</Status>
+    <Number>ЭК-0001234</Number>
+    <Date>2026-04-20</Date>
+  </Waybill>
+</Response>
