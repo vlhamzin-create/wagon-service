@@ -6,28 +6,17 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from app.config import settings
 
-logger = structlog.get_logger(__name__)
+log = structlog.get_logger(__name__)
 
 _scheduler: AsyncIOScheduler | None = None
 
 
 async def _sync_job() -> None:
-    """Фоновая задача синхронизации данных вагонов из внешних систем."""
+    """Фоновая задача: синхронизация данных из RWL и 1С."""
     from app.database import AsyncSessionLocal
-    from app.repositories.sync_log_repo import SyncLogRepository
+    from app.services.sync_service import run_sync_job
 
-    logger.info("sync_job.started")
-    async with AsyncSessionLocal() as session:
-        repo = SyncLogRepository(session)
-        for source in ("rwl", "onec"):
-            try:
-                # Реальная синхронизация реализуется в соответствующих клиентах
-                await repo.upsert(source=source, last_status="ok")
-                logger.info("sync_job.source_ok", source=source)
-            except Exception as exc:
-                await repo.upsert(source=source, last_status="error", last_error=str(exc))
-                logger.error("sync_job.source_error", source=source, error=str(exc))
-    logger.info("sync_job.finished")
+    await run_sync_job(AsyncSessionLocal)
 
 
 def create_scheduler() -> AsyncIOScheduler:
