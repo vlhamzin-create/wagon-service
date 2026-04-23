@@ -1,0 +1,33 @@
+<SendWaybill>
+  <AccessParams>
+    <Login>test_login</Login>
+    <Password>secret</Password>
+    <AsuGoId>ASU001</AsuGoId>
+  </AccessParams>
+  <Waybill>
+    <OperationType>visaRequest</OperationType>
+    <Shipper>
+      <OKPO>12345678</OKPO>
+      <Name>ООО Грузоотправитель</Name>
+      <StationCode>20000</StationCode>
+      <StationName>Станция отправления</StationName>
+    </Shipper>
+    <Consignee>
+      <OKPO>87654321</OKPO>
+      <Name>ООО Грузополучатель</Name>
+      <StationCode>30000</StationCode>
+      <StationName>Станция назначения</StationName>
+    </Consignee>
+    <Cargo>
+      <EtsngCode>011001</EtsngCode>
+      <CargoName>Уголь каменный</CargoName>
+      <WeightGrossKg>60000</WeightGrossKg>
+    </Cargo>
+    <WagonList>
+      <Wagon>
+        <WagonNumber>12345678</WagonNumber>
+        <WagonType>Полувагон</WagonType>
+      </Wagon>
+    </WagonList>
+  </Waybill>
+</SendWaybill>

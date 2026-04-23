@@ -1,0 +1,15 @@
+<SendRedirection>
+  <AccessParams>
+    <Login>test_login</Login>
+    <Password>secret</Password>
+    <AsuGoId>ASU001</AsuGoId>
+  </AccessParams>
+  <Redirection>
+    <WaybillID>WB-2026-00567</WaybillID>
+    <WagonNumber>12345678</WagonNumber>
+    <NewDestStationCode>40000</NewDestStationCode>
+    <NewDestStationName>Новая станция</NewDestStationName>
+    <ReasonCode>01</ReasonCode>
+    <ReasonDescription>Изменение маршрута</ReasonDescription>
+  </Redirection>
+</SendRedirection>
